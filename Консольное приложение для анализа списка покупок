@@ -1,0 +1,88 @@
+from datetime import datetime
+
+FILE_NAME = "shopping_list.txt"
+
+def add_purchase():
+    """Добавление новой покупки."""
+    print("\n--- Добавление покупки ---")
+    item = input("Название товара: ")
+    category = input("Категория (например, Продукты, Одежда): ")
+    
+    try:
+        price = float(input("Сумма (руб.): "))
+    except ValueError:
+        print("Ошибка: введите корректное число для цены.")
+        return
+
+    date = datetime.now().strftime("%d.%m.%Y %H:%M")
+
+    with open(FILE_NAME, "a", encoding="utf-8") as file:
+        file.write(f"{item};{category};{price};{date}\n")
+    print("✓ Покупка успешно добавлена!")
+
+
+def view_all():
+    """Просмотр всех покупок и подсчет общего итога."""
+    print("\n--- Все покупки ---")
+    try:
+        with open(FILE_NAME, "r", encoding="utf-8") as file:
+            lines = file.readlines()
+            if not lines:
+                print("Список покупок пуст.")
+                return
+            
+            total = 0
+            for i, line in enumerate(lines, 1):
+                item, category, price, date = line.strip().split(";")
+                total += float(price)
+                print(f"{i}. {item} | {category} | {price} руб. | {date}")
+            print(f"\nОбщая сумма всех трат: {total:.2f} руб.")
+    except FileNotFoundError:
+        print("Список покупок пуст.")
+
+
+def analyze_by_category():
+    """Анализ расходов по категориям."""
+    print("\n--- Анализ по категориям ---")
+    try:
+        with open(FILE_NAME, "r", encoding="utf-8") as file:
+            categories = {}
+            for line in file:
+                _, category, price, _ = line.strip().split(";")
+                categories[category] = categories.get(category, 0) + float(price)
+            
+            if not categories:
+                print("Нет данных для анализа.")
+                return
+
+            for cat, total in categories.items():
+                print(f"Категория '{cat}': {total:.2f} руб.")
+    except FileNotFoundError:
+        print("Список покупок пуст.")
+
+
+def main():
+    """Главное меню программы."""
+    while True:
+        print("\n=== ТРЕКЕР ПОКУПОК ===")
+        print("1. Добавить покупку")
+        print("2. Посмотреть все покупки")
+        print("3. Анализ расходов по категориям")
+        print("4. Выход")
+        
+        choice = input("Выберите действие (1-4): ")
+        
+        if choice == '1':
+            add_purchase()
+        elif choice == '2':
+            view_all()
+        elif choice == '3':
+            analyze_by_category()
+        elif choice == '4':
+            print("До свидания!")
+            break
+        else:
+            print("Ошибка: выберите пункт от 1 до 4.")
+
+if __name__ == "__main__":
+    main()
